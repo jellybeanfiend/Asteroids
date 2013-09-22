@@ -116,10 +116,6 @@ $(document).ready(function(){
 
 	function update_ship_logic(){
 
-	}
-
-	function update_logic(){
-
 		// Depending on the input, change the turn angle/speed of the ship
 		if(input.left)
 			ship.turn_angle = (ship.turn_angle - ship.turn_speed) % 360
@@ -129,11 +125,7 @@ $(document).ready(function(){
 			ship.speed += acceleration(ship.speed)
 			ship.direction_angle = ship.turn_angle	
 		}
-		// The user has fired a shot
-		if(input.fire){
-			ship.shots.push(new shot(ship.x,ship.y,ship.turn_angle))
-			input.fire = false
-		}
+
 		// Slightly decrease speed
 		if(ship.speed > 0)
 			ship.speed -= .01
@@ -141,11 +133,14 @@ $(document).ready(function(){
 		// Change the x and y location of the ship, taking into account direction angle and speed
 		ship.y -= Math.cos(ship.direction_angle*Math.PI/180) * ship.speed
 		ship.x += Math.sin(ship.direction_angle*Math.PI/180) * ship.speed
-		
-		// Check bounds, move ship to other side of canvas if out of bounds
-		ship.x = ship.x > WIDTH ? 0 : ship.x < 0 ? WIDTH : ship.x
-		ship.y = ship.y > HEIGHT ? 0 : ship.y < 0 ? HEIGHT : ship.y
+	}
 
+	function update_shot_logic(){
+		// The user has fired a shot
+		if(input.fire){
+			ship.shots.push(new shot(ship.x,ship.y,ship.turn_angle))
+			input.fire = false
+		}
 		// Update each shot currently in play
 		for(var i = 0; i < ship.shots.length; i++){
 			// Update x and y coordinates
@@ -156,6 +151,19 @@ $(document).ready(function(){
 			if(ship.shots[i].distance_traveled >= ship.max_shot_distance)
 				ship.shots.splice(i,1)
 		}
+	}
+
+	function check_bounds(){
+		// Check bounds, move ship to other side of canvas if out of bounds
+		ship.x = ship.x > WIDTH ? 0 : ship.x < 0 ? WIDTH : ship.x
+		ship.y = ship.y > HEIGHT ? 0 : ship.y < 0 ? HEIGHT : ship.y
+	}
+
+	function update_logic(){
+
+		update_ship_logic();
+
+		update_shot_logic();
 
 		// Update each asteroid location
 		for(var i = 0; i < current_asteroids.length; i++){
@@ -172,7 +180,7 @@ $(document).ready(function(){
 
 			var distx = current.x - ship.x;
 			var disty = current.y - ship.y;
-			if(Math.sqrt((distx*distx) + (disty*disty)) < (5*current.size/2 + 3)){
+			if(Math.sqrt((distx*distx) + (disty*disty)) < (4*current.size/2 + 3)){
 				current_asteroids.splice(i,1)
 				ship.alive = false
 			}
@@ -186,7 +194,6 @@ $(document).ready(function(){
 					break;
 				}
 			}
-
 
 		}
 
@@ -235,7 +242,7 @@ $(document).ready(function(){
 
 	function draw_asteroids(){
 		ctx.strokeStyle = '#FFF'
-		ctx.fillStyle = 'red'
+		ctx.fillStyle =  'red'
 		for(var i = 0; i < current_asteroids.length; i++){
 			var points = asteroid_shapes[current_asteroids[i].shape]
 			var x = current_asteroids[i].x
@@ -245,12 +252,6 @@ $(document).ready(function(){
 			ctx.translate(current_asteroids[i].x, current_asteroids[i].y)
 			ctx.rotate(current_asteroids[i].angle*Math.PI/180)
 			ctx.translate(-current_asteroids[i].x, -current_asteroids[i].y)
-			// ctx.fillStyle="blue"
-			// ctx.fillRect(x,y,2,2);
-			// ctx.beginPath()
-			// ctx.arc(x,y,20*6/2,0,2*Math.PI)
-			// ctx.closePath()
-			// ctx.stroke()
 
 			ctx.beginPath()
 			ctx.moveTo((points[0][0]*size)+x,(points[0][1]*size)+y)
