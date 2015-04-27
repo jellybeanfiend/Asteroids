@@ -1,4 +1,4 @@
 Asteroids
 =========
 
-Remaking a legend into something slightly more shitty
+It's Asteroids! Kinda...
